@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>RSK test</title>
+	
+	<style>
+	body{
+		background-color: #eee;
+		font-family: arial;
+	}
+	*{
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-o-box-sizing: border-box;
+		-ms-box-sizing: border-box;
+		box-sizing: border-box;
+	}
+	
+
+	.marg{
+		margin: 1em;
+	}
+
+	/* THEME */
+
+	.rsk_basic{
+		background-color: #c41;
+	    border: 1px solid #b93103;
+	    border-radius: 4px;
+	    color: #fff;
+	    padding: 0.7em 1em;
+	    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+	    cursor: pointer;
+	    font-size: 1em;
+	}
+
+	/*Lightbox*/
+	.lightboxHaze {
+	    background-color: rgba(0, 0, 0, 0.5);
+	    bottom: 0;
+	    left: 0;
+	    position: fixed;
+	    right: 0;
+	    top: 0;
+	    z-index: 100;
+	}
+	.lightbox {
+	    background-color: #fff;
+	    bottom: 0;
+	    height: 500px;
+	    left: 0;
+	    margin: auto;
+	    max-width: 800px;
+	    position: fixed;
+	    right: 0;
+	    top: 0;
+	    width: 100%;
+	    z-index: 10;
+	}
+	
+	input[type="text"],
+	input[type="tel"],
+	input[type="email"] {
+	   	width: 95%;
+	   	display: inline-block;
+	}
+	input[type="submit"]{
+		float: right;
+	}
+	
+	.close{
+	   	color: #000;
+	    font-size: 2.3em;
+	    position: absolute;
+	    right: 0.5em;
+	    text-align: center;
+	    top: 0.1em;
+	    z-index: 1;
+		cursor: pointer;
+	}
+	.close:before{
+		content: "\2715";
+	}
+
+	.lightboxContent{
+		padding: 4.5em 3em;
+	}
+	.titlewrap{
+		display: block;
+	}
+
+	/*dropdown*/
+	.select {
+	    text-align: left;
+	    position: relative;
+	    position: relative;
+	    z-index: 2;
+	    -webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	.rsk_selectfieldwrap{
+		position: relative;
+		width: 200px;
+		cursor: pointer;
+	}
+	.rsk_selectfieldwrap .chevron{
+		background-size: contain;
+	    height: 35px;
+	    position: absolute;
+	    right: 10px;
+	    top: 4px;
+	    width: 35px;
+	    z-index:3;
+	}
+	.rsk_selectfieldwrap .chevronup{
+		background-image:url('/rsk/assets/ios7-arrow-up.png');
+	}
+	.rsk_selectfieldwrap .chevrondown{
+		background-image:url('/rsk/assets/ios7-arrow-down.png');
+	}
+	.select:hover{
+		background-color: #d34b18;
+	}
+	.select:active{
+		background-color: #b93103;
+	}
+	.dropdown_list{
+		background-color: #c41;
+	    color: #fff;
+	    padding: 0;
+	    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+	    width: 200px;
+	    border-radius: 0 0 4px 4px;
+	    overflow: hidden;
+	    margin-top: -2px;
+	    position: absolute;
+	    z-index: 1;
+	    transition: height .05s ease-in;
+	}
+	.dropdown_list > div {
+	    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+	    cursor: pointer;
+	    padding: 0.7em 1em;
+	    -webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	.dropdown_list > div:first-child {
+		/*padding-top: 1em;*/
+	}
+	.dropdown_list > div:hover{
+		background-color: #d34b18;
+	}
+	.dropdown_list > div:active{
+		background-color: #b93103;
+	}
+	
+
+	/* Checkboxes */
+	.rsk_checkbox_wrap {
+	    display: inline-block;
+	    position: relative;
+	    width: 30px;
+	    height: 30px;
+	}
+	
+	.rsk_checkbox {
+	    background-color: #c41;
+	    height: 30px;
+	    left: 0;
+	    position: absolute;
+	    top: 0;
+	    width: 30px;
+	    border-radius: 4px;
+	    cursor: pointer;
+	    border: 1px solid #b93103;
+	    color: #333;
+	}
+	.rsk_checkbox:hover{
+		background-color: #d34b18;
+	}
+	.rsk_checkbox:active{
+		background-color: #b93103;
+	}
+	.rsk_checkbox[data-checked="true"]{
+		background-color: #c41;
+		color: #fff;
+	}
+	.rsk_checkbox[data-checked="true"]:after {
+		content: "\2715";
+	    font-size: 1.2em;
+	    font-weight: bold;
+	    left: 6px;
+	    position: absolute;
+	    top: 1px;
+    }
+	/*
+		RadiobuttonWrap
+	*/
+
+	.rsk_radiobutton_wrap {
+	    display: inline-block;
+	    height: 20px;
+	    position: relative;
+	    width: 20px;
+	}
+
+    .rsk_radiobutton{
+    	background-color: #c41;
+	    border: 1px solid #b93103;
+	    border-radius: 11px;
+	    color: #333;
+	    cursor: pointer;
+	    height: 21px;
+	    left: 0;
+	    position: absolute;
+	    top: 0;
+	    width: 21px;
+    }
+    .rsk_radiobutton[data-checked="true"]:after {
+		background-color: #fff;
+	    border-radius: 10px;
+	    content: "";
+	    font-size: 2.2em;
+	    font-weight: bold;
+	    height: 9px;
+	    left: 5px;
+	    position: absolute;
+	    top: 5px;
+	    width: 9px;
+    }
+	
+	/* Progressbar */
+	.rsk_progress{
+		border: 1px solid #b93103;
+		border-radius: 4px;
+		min-height: 40px;
+		padding: 1px;
+		position: relative;
+		background-color: #c41;
+	}
+	.rsk_inner_bar{
+		background-color: #b93103;
+	    border-radius: 4px 0 0 4px;
+	    min-height: 40px;
+	    width: 0%;
+	    transition: width .1s linear;
+	}
+
+	.rsk_progress_label {
+	    bottom: 0;
+	    color: #fff;
+	    height: 20px;
+	    left: 0;
+	    margin: auto;
+	    position: absolute;
+	    right: 0;
+	    text-align: center;
+	    top: 0;
+	}
+
+	/** SLider **/
+	.rsk_slider_wrap{
+		position: relative;
+		width: 320px;
+	}
+	.rsk_slider_rail {
+	    background-color: #ccc;
+	    height: 20px;
+	    left: 0;
+	    position: absolute;
+	    top: 0;
+	    width: 100%;
+	}
+
+	.rsk_slider_handle {
+	    background-color: red;
+	    cursor: pointer;
+	    height: 26px;
+	    left: 0;
+	    position: absolute;
+	    top: -3px;
+	    width: 10px;
+	}
+
+
+	</style>
+	<script src="js/GuiSurvivalKit.js"></script>
+</head>
+<body>
+	<div class="marg">
+	<select id="dropdown">
+		<option value="1">Option 1</option>
+		<option value="2">Option 2</option>
+		<option value="3">Option 3</option>
+		<option value="4">Option 4</option>
+	</select>
+	</div>
+	<div class="marg">
+	<button class="rsk_basic lb">Vis lightbox</button>
+	</div>
+
+	<div class="marg">
+	<input type="checkbox" class="shitbox" />
+	<input type="checkbox" class="shitbox" />
+	<input type="checkbox" class="shitbox" />
+	</div>
+
+	<div class="marg">
+		<input type="radio" name="radio" class="shitbox2" />
+		<input type="radio" name="radio" class="shitbox2" />
+		<input type="radio" name="radio" class="shitbox2" />
+	</div>
+
+	<div class="marg">
+		<div class="tooltip" data-rsktitle="Tooltip er fett">
+			Test ja
+		</div>
+		<a href="" data-rsktitle="Linken leder ingen steder">Link</a>
+	</div>
+	
+	<div class="marg">
+		<div id="progress">
+		</div>
+	</div>
+
+	<div class="marg">
+		<input type="range" id="range" name="range" min="0" max="100" />
+	</div>
+
+	<script type="text/javascript">
+		window.onload = function () {
+			var lb = RSK('body').widget('Lightbox', {
+				html: 'test'
+			});
+			document.getElementsByClassName('lb')[0].addEventListener('click', function () {
+				lb.open();
+			}), false;
+			
+
+			RSK('#dropdown').widget('Dropdown', {
+				onSelect: function (e) {
+					//Do whatever you want
+					console.log(e);
+				}
+			});
+
+			var checkbox = RSK('.shitbox').widget('Checkbox');
+			var radio = RSK('.shitbox2').widget('Radiobutton');
+
+
+			var progress = 30;
+			var prog = RSK('#progress').widget('Progressbar', {
+				onDone: function () {
+					console.log('progressdone');
+				},
+				startValue: progress,
+				label: true
+			});
+			
+			RSK('#range').widget('Slider', {});
+
+			
+			setInterval(function () {
+				progress += 0.1;
+				prog.setProgress(progress);
+			}, 10);
+			
+		}	
+
+	</script>
+</body>
+</html>

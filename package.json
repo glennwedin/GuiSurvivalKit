@@ -1,0 +1,22 @@
+{
+  "name": "guisurvivalkit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glennwedin/GuiSurvivalKit.git"
+  },
+  "author": "Glenn Wedin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/glennwedin/GuiSurvivalKit/issues"
+  },
+  "homepage": "https://github.com/glennwedin/GuiSurvivalKit#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0"
+  }
+}

@@ -232,6 +232,90 @@
 			return new LightboxConstructor;
 		},
 
+		Slider: function (opts) {
+			var _el = Array.prototype.slice.call(this.el);
+
+			var settings = {
+				range: false,
+				max: 100,
+				min: 0,
+				values: [this.min, this.max]
+			};
+			settings = tools.extend(settings, opts);
+
+			var SliderConstructor = function () {
+				console.log(this);
+
+				var sliderwrap,
+				sliderrail,
+				sliderhandle,
+				parent = this.parentNode,
+				originalSlider = this;
+
+				sliderwrap = document.createElement('div');
+				sliderwrap.className = "rsk_slider_wrap";
+				sliderrail = document.createElement('div');
+				sliderrail.className = "rsk_slider_rail";
+				sliderhandle = document.createElement('div');
+				sliderhandle.setAttribute('data-val', settings.min);
+				sliderhandle.className="rsk_slider_handle";
+				//sliderwrap.appendChild(sliderrail);
+				
+				//EVENTS
+				var start, 
+					delta, 
+					slidemax;
+				var mousemove = function (e) {
+					//delta = e.clientX - start;
+					delta = (e.clientX-sliderwrap.offsetLeft) - start;
+					console.log(start)
+					
+					
+					//Something fishy going on with delta
+					if(start+delta < 0) {
+						start = 0;
+					} else if(start+delta > slidemax) {
+						start = slidemax;
+					} else {
+						start = start+delta;
+					}					
+					sliderhandle.setAttribute('data-val', start);
+					sliderhandle.style.left = start+'px';
+					
+				}
+
+				sliderhandle.addEventListener('mousedown', function (e) {
+					start = parseInt(sliderhandle.getAttribute('data-val'));
+					window.addEventListener('mousemove', mousemove, false);
+				}, false);
+
+				window.addEventListener('mouseup', function (e) {
+					//start = e.clientX;
+					console.log(start)
+					window.removeEventListener('mousemove', mousemove);
+				});
+				
+
+				//EVENTS SLUTT
+
+				parent.replaceChild(sliderwrap, originalSlider);
+				sliderwrap.appendChild(originalSlider);
+				sliderwrap.appendChild(sliderrail);
+				sliderwrap.appendChild(sliderhandle);
+
+				slidemax = sliderwrap.offsetWidth;
+
+				if(settings.range) {
+					sliderhandle.setAttribute('data-val', settings.max);
+					sliderwrap.appendChild(sliderhandle);
+				}
+			}
+
+			_el.forEach(function (el, i) {
+				SliderConstructor.call(el);
+			});
+		},
+
 		Dropdown: function (opts) {
 			var _el = this.el;
 			_el = Array.prototype.slice.call(_el);
