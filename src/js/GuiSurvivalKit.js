@@ -243,9 +243,51 @@
 			};
 			settings = tools.extend(settings, opts);
 
-			var SliderConstructor = function () {
-				console.log(this);
+			var SliderHandle = function (val) {
+				var th = this;
+				th.start = settings.values[0];
+				th.delta;
+				th.slidemax;
+				th.handle = document.createElement('div');
+				th.handle.setAttribute('data-val', val);
+				th.handle.className="rsk_slider_handle";
+				th.handle.style.left = val+'%';
 
+				var move = function (e) {
+					th.mousemove(e);
+				}
+				th.handle.addEventListener('mousedown', function (e) {
+					th.start = parseInt(th.handle.getAttribute('data-val'));
+					window.addEventListener('mousemove', move, false);
+				}, false);
+
+				window.addEventListener('mouseup', function (e) {
+					window.removeEventListener('mousemove', move);
+				});
+			};
+			SliderHandle.prototype.mousemove = function (e) {
+				var th = this;
+					console.log(th.handle.parentNode.offsetWidth/(e.clientX-th.handle.parentNode.offsetLeft)*100);return
+					th.delta = (e.clientX/th.handle.parentNode.offsetLeft) - th.start;
+					//console.log(th.delta);
+					//th.delta = e.clientX - th.handle.getAttribute('data-val');
+
+					if(th.start+th.delta < 0) {
+						start = 0;
+					} else if(th.start+th.delta > th.slidemax) {
+						th.start = th.slidemax;
+					} else {
+						th.start = th.start+th.delta;
+					}
+					th.handle.setAttribute('data-val', th.start);
+					th.handle.style.left = th.start+'%';
+					
+			};
+			SliderHandle.prototype.render = function () {
+				return this.handle;
+			};
+
+			var SliderConstructor = function () {
 				var sliderwrap,
 				sliderrail,
 				sliderhandle,
@@ -256,13 +298,18 @@
 				sliderwrap.className = "rsk_slider_wrap";
 				sliderrail = document.createElement('div');
 				sliderrail.className = "rsk_slider_rail";
+
+				sliderhandle = new SliderHandle(settings.values[0]);
+				/*
 				sliderhandle = document.createElement('div');
 				sliderhandle.setAttribute('data-val', settings.min);
-				sliderhandle.className="rsk_slider_handle";
+				sliderhandle.className="rsk_slider_handle";*/
 				//sliderwrap.appendChild(sliderrail);
 				
 				//EVENTS
-				var start, 
+				//console.log(settings.values[0])
+				/*
+				var start = settings.values[0], 
 					delta, 
 					slidemax;
 				var mousemove = function (e) {
@@ -278,36 +325,35 @@
 						start = slidemax;
 					} else {
 						start = start+delta;
-					}					
+					}	
+					/*				
 					sliderhandle.setAttribute('data-val', start);
 					sliderhandle.style.left = start+'px';
+					*/
 					
-				}
+				//}
 
+				/*
 				sliderhandle.addEventListener('mousedown', function (e) {
 					start = parseInt(sliderhandle.getAttribute('data-val'));
 					window.addEventListener('mousemove', mousemove, false);
 				}, false);
-
-				window.addEventListener('mouseup', function (e) {
-					//start = e.clientX;
-					console.log(start)
-					window.removeEventListener('mousemove', mousemove);
-				});
-				
-
+				*/
 				//EVENTS SLUTT
 
 				parent.replaceChild(sliderwrap, originalSlider);
 				sliderwrap.appendChild(originalSlider);
 				sliderwrap.appendChild(sliderrail);
-				sliderwrap.appendChild(sliderhandle);
+				sliderwrap.appendChild(sliderhandle.render());
 
-				slidemax = sliderwrap.offsetWidth;
+				//sliderhandle.slidemax = sliderwrap.offsetWidth;
+				sliderhandle.slidemax = settings.max;
 
 				if(settings.range) {
-					sliderhandle.setAttribute('data-val', settings.max);
-					sliderwrap.appendChild(sliderhandle);
+					var sliderhandle2 = new SliderHandle(settings.values[1]);
+					sliderhandle2.handle.setAttribute('data-val', settings.values[1]);
+					sliderhandle2.slidemax = sliderwrap.offsetWidth;
+					sliderwrap.appendChild(sliderhandle2.render());
 				}
 			}
 

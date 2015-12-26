@@ -363,13 +363,17 @@
 				label: true
 			});
 			
-			RSK('#range').widget('Slider', {});
+			RSK('#range').widget('Slider', {
+				values: [20, 70],
+				range: false
+			});
 
-			
+			/*
 			setInterval(function () {
 				progress += 0.1;
 				prog.setProgress(progress);
 			}, 10);
+			*/
 			
 		}	
 
