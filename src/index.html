@@ -335,27 +335,35 @@
 
 	<script type="text/javascript">
 		window.onload = function () {
-			var lb = RSK('body').widget('Lightbox', {
+			/*
+			var lb = GSK('body').widget('Lightbox', {
 				html: 'test'
 			});
 			document.getElementsByClassName('lb')[0].addEventListener('click', function () {
 				lb.open();
 			}), false;
-			
+			*/			
 
-			RSK('#dropdown').widget('Dropdown', {
+			GSK('#dropdown').widget('Dropdown', {
 				onSelect: function (e) {
 					//Do whatever you want
 					console.log(e);
-				}
+				},
+				multiple: false //buggy
 			});
-
-			var checkbox = RSK('.shitbox').widget('Checkbox');
-			var radio = RSK('.shitbox2').widget('Radiobutton');
-
+			
+			var checkbox = GSK('.shitbox').widget('Checkbox');
+			var radio = GSK('.shitbox2').widget('Radiobutton');
 
 			var progress = 30;
-			var prog = RSK('#progress').widget('Progressbar', {
+			GSK('#progress').widget('Progressbar', {
+				onReady: function () {
+					var th = this;
+					setInterval(function () {
+						progress += 0.1;
+						th.setProgress(progress);
+					}, 10);
+				},
 				onDone: function () {
 					console.log('progressdone');
 				},
@@ -363,13 +371,8 @@
 				label: true
 			});
 			
-			RSK('#range').widget('Slider', {});
-
 			
-			setInterval(function () {
-				progress += 0.1;
-				prog.setProgress(progress);
-			}, 10);
+			//GSK('#range').widget('Slider', {});
 			
 		}	
 

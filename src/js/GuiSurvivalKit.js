@@ -31,6 +31,7 @@
 
 			var settings = {
 				onDone: null,
+				onReady: null,
 				startValue: 0,
 				label: false
 			}
@@ -51,6 +52,9 @@
 						el.appendChild(label);
 					}
 				});
+				if(settings.onReady) {
+					settings.onReady.call(this);
+				}
 			}
 
 			ProgressbarConstructor.prototype.setProgress = function (progress) {
@@ -80,9 +84,14 @@
 			return new ProgressbarConstructor;
 		},
 
-		Radiobutton: function () {
+		Radiobutton: function (opts) {
 			var _el = this.el;
 			_el = Array.prototype.slice.call(_el);
+
+			var settings = {
+				onSelect: false
+			}
+			settings = tools.extend(settings, opts);
 
 			var RadiobuttonConstructor = function () {
 				var checkboxwrap, checkbox,
@@ -104,20 +113,49 @@
 					this.setAttribute('data-checked', 'false');
 				}, false);
 
-				checkbox.addEventListener('click', function () {
-					//console.log(this.getAttribute('data-checked'))
-					if(this.getAttribute('data-checked') != "true") {
-						var children = parent.getElementsByClassName(this.className);
-						var i = 0;
-						while(i < children.length) {
-							children[i].setAttribute('data-checked', false);
-							i++;
-						}
+				if(originalCheckbox.checked) {
+					checkbox.setAttribute('data-checked', true);
+				}
 
-						originalCheckbox.checked = true;
-						this.setAttribute('data-checked', true);
-					}
-				}, false);
+				if(settings.onSelect || settings.afterSelect) {
+					var th = this;
+
+						checkbox.addEventListener('click', function () {
+							
+							if(settings.onSelect) {
+								settings.onSelect(th);
+							}
+							if(this.getAttribute('data-checked') != "true") {
+								var children = parent.getElementsByClassName(this.className);
+								var i = 0;
+								console.log(children)
+								while(i < children.length) {
+									children[i].setAttribute('data-checked', false);
+									i++;
+								}
+								originalCheckbox.checked = true;
+								this.setAttribute('data-checked', true);
+								if(settings.afterSelect) {
+									settings.afterSelect(th);
+								}
+							}
+						}, false);
+				} else {
+					checkbox.addEventListener('click', function () {
+						//console.log(this.getAttribute('data-checked'))
+						if(this.getAttribute('data-checked') != "true") {
+							var children = parent.getElementsByClassName(this.className);
+							var i = 0;
+							while(i < children.length) {
+								children[i].setAttribute('data-checked', false);
+								i++;
+							}
+
+							originalCheckbox.checked = true;
+							this.setAttribute('data-checked', true);
+						}
+					}, false);
+				}
 			}
 
 			_el.forEach(function (el, i) {
@@ -162,8 +200,26 @@
 					}
 				}, false)
 
-				if(settings.onSelect) {
 
+				var th = this;
+			
+				if(settings.onSelect || settings.afterSelect) {
+					//Dersom man håndterer select med callback
+					checkbox.addEventListener('click', function (e) {
+						if(settings.onSelect) {
+							settings.onSelect(th);
+						}
+						if(this.getAttribute('data-checked') == "true") {
+							originalCheckbox.checked = false;
+							this.setAttribute('data-checked', false);
+						} else {
+							originalCheckbox.checked = true;
+							this.setAttribute('data-checked', true);
+						}
+						if(settings.afterSelect) {
+							settings.afterSelect(th);
+						}
+					}, false);
 				} else {
 					checkbox.addEventListener('click', function (e) {
 						if(this.getAttribute('data-checked') == "true") {
@@ -184,17 +240,15 @@
 
 		Lightbox: function (opts) {
 			var _el = this.el;
-
 			var settings = {
 				html: 'Mangler innhold'
 			};
-
 			settings = tools.extend(settings, opts);
 
 			var LightboxConstructor = function () {
 				var haze, maindiv, close, th = this;
 				haze = document.createElement('div');
-				haze.className="lightboxHaze";
+				haze.className = "lightboxHaze";
 
 				maindiv = document.createElement('div');
 				maindiv.className = "lightbox";
@@ -216,9 +270,11 @@
 				}
 
 			};
+
 			LightboxConstructor.prototype.open = function () {
 				_el[0].appendChild(this.html);
 			};
+
 			LightboxConstructor.prototype.close = function () {
 				if(settings.onBeforeClose) {
 					settings.onBeforeClose();
@@ -232,90 +288,6 @@
 			return new LightboxConstructor;
 		},
 
-		Slider: function (opts) {
-			var _el = Array.prototype.slice.call(this.el);
-
-			var settings = {
-				range: false,
-				max: 100,
-				min: 0,
-				values: [this.min, this.max]
-			};
-			settings = tools.extend(settings, opts);
-
-			var SliderConstructor = function () {
-				console.log(this);
-
-				var sliderwrap,
-				sliderrail,
-				sliderhandle,
-				parent = this.parentNode,
-				originalSlider = this;
-
-				sliderwrap = document.createElement('div');
-				sliderwrap.className = "rsk_slider_wrap";
-				sliderrail = document.createElement('div');
-				sliderrail.className = "rsk_slider_rail";
-				sliderhandle = document.createElement('div');
-				sliderhandle.setAttribute('data-val', settings.min);
-				sliderhandle.className="rsk_slider_handle";
-				//sliderwrap.appendChild(sliderrail);
-				
-				//EVENTS
-				var start, 
-					delta, 
-					slidemax;
-				var mousemove = function (e) {
-					//delta = e.clientX - start;
-					delta = (e.clientX-sliderwrap.offsetLeft) - start;
-					console.log(start)
-					
-					
-					//Something fishy going on with delta
-					if(start+delta < 0) {
-						start = 0;
-					} else if(start+delta > slidemax) {
-						start = slidemax;
-					} else {
-						start = start+delta;
-					}					
-					sliderhandle.setAttribute('data-val', start);
-					sliderhandle.style.left = start+'px';
-					
-				}
-
-				sliderhandle.addEventListener('mousedown', function (e) {
-					start = parseInt(sliderhandle.getAttribute('data-val'));
-					window.addEventListener('mousemove', mousemove, false);
-				}, false);
-
-				window.addEventListener('mouseup', function (e) {
-					//start = e.clientX;
-					console.log(start)
-					window.removeEventListener('mousemove', mousemove);
-				});
-				
-
-				//EVENTS SLUTT
-
-				parent.replaceChild(sliderwrap, originalSlider);
-				sliderwrap.appendChild(originalSlider);
-				sliderwrap.appendChild(sliderrail);
-				sliderwrap.appendChild(sliderhandle);
-
-				slidemax = sliderwrap.offsetWidth;
-
-				if(settings.range) {
-					sliderhandle.setAttribute('data-val', settings.max);
-					sliderwrap.appendChild(sliderhandle);
-				}
-			}
-
-			_el.forEach(function (el, i) {
-				SliderConstructor.call(el);
-			});
-		},
-
 		Dropdown: function (opts) {
 			var _el = this.el;
 			_el = Array.prototype.slice.call(_el);
@@ -325,13 +297,16 @@
 				onInit: null,
 				onSelect: null,
 				onShow: null,
+				onChange: null,
+				afterSelect: null,
 				height: null,
-				multiple: false
+				multiple: false,
+				disabled: false
 			}
 			settings = tools.extend(settings, opts);
 
 			var DropdownConstructor = function () {
-
+				this.settings = settings;
 				var visible = 0,
 					button,
 					values = [],
@@ -351,34 +326,92 @@
 				var methods = {
 					slideToggle: function () {
 						var parent = th.parentNode;
-						console.log(parent)
 						if(visible) {
 							//hide
 							visible = 0;
+							parent.getElementsByClassName('rsk_selectfieldwrap')[0].className = parent.getElementsByClassName('rsk_selectfieldwrap')[0].className.replace('active', '');
 							parent.getElementsByClassName('dropdown_list')[0].style.height = '0';
 							parent.getElementsByClassName('rsk_chevron')[0].className = "rsk_chevron rsk_chevrondown";
 							parent.removeEventListener('transitionend', settings.onShow);
 						} else {
 							//show
 							visible = 1;
+							parent.getElementsByClassName('rsk_selectfieldwrap')[0].className += " active";
 							parent.getElementsByClassName('dropdown_list')[0].style.height = dropheight+'px';
 							parent.getElementsByClassName('rsk_chevron')[0].className = "rsk_chevron rsk_chevronup";
-
 							parent.addEventListener('transitionend', settings.onShow, false);
 						}
 					},
 					hide: function () {
 						var parent = th.parentNode;
 						visible = 0;
+						parent.getElementsByClassName('rsk_selectfieldwrap')[0].className = parent.getElementsByClassName('rsk_selectfieldwrap')[0].className.replace('active', '');
 						parent.getElementsByClassName('dropdown_list')[0].style.height = '0';
 						parent.getElementsByClassName('rsk_chevron')[0].className = "rsk_chevron rsk_chevrondown";
+						parent.removeEventListener('transitionend', settings.onShow);
+					},
+					setOptions: function () {
+						var list = document.createElement('div');
+						list.className="dropdown_list";
+
+						for(i = 1; i < th.options.length; i++) {
+							optionValue = th.options[i].value;
+							optionText  = th.options[i].innerHTML;
+							option = document.createElement('div');
+							option.setAttribute('data-value', optionValue);
+							option.setAttribute('data-index', i);
+							
+							if(settings.multiple && i > 0) {
+								option.innerHTML = '<div class="checkboxwrap"><input type="checkbox" class="checkbox" /></div><div class="value">'+optionText+'</div>';
+							} else {
+								option.innerHTML = optionText;
+							}
+
+							if(settings.onSelect && settings.multiple) {
+								option.addEventListener('click', function (e) {
+									e.stopPropagation();
+									if(th.options[this.getAttribute('data-index')].getAttribute('selected') !== 'true') {
+										th.options[this.getAttribute('data-index')].setAttribute('selected', 'true');
+									} else {
+										th.options[this.getAttribute('data-index')].removeAttribute('selected');
+									}
+									
+									settings.onSelect({evt: e, option: this, methods: methods});
+								});
+							} else if(settings.onSelect && !settings.multiple) {
+								option.addEventListener('click', function (e) {
+									e.stopPropagation();
+									this.value = this.getAttribute('data-value');
+									th.value = this.getAttribute('data-value');
+									select.innerHTML = this.innerHTML;
+									methods.slideToggle();
+
+									settings.onSelect({evt: e, option: this, methods: methods});
+								}, false);
+							} else {
+								option.addEventListener('click', function (e) {
+									e.stopPropagation();
+									this.value = this.getAttribute('data-value');
+									th.value = this.getAttribute('data-value');
+									select.innerHTML = this.innerHTML;
+									methods.slideToggle();
+								}, false);
+							}
+
+							list.appendChild(option);
+						}
+						return list;
 					}
 				}
 
-				options = this.getElementsByTagName('option');
+				//options = this.getElementsByTagName('option');
 
 				selectwrap = document.createElement('div');
 				selectwrap.className="rsk_dropdownWrap";
+				if(settings.disabled) {
+					selectwrap.className="rsk_dropdownWrap disabled";
+				}
+				selectwrap.setAttribute('data-name', this.name);
 
 				selectfieldwrap = document.createElement('div');
 				selectfieldwrap.className = "rsk_selectfieldwrap";
@@ -390,69 +423,60 @@
 				select.className="rsk_basic select";
 				select.innerHTML = this.options[this.selectedIndex].text;
 				selectfieldwrap.appendChild(chevron);
-				selectfieldwrap.addEventListener('click', function () {
+				selectfieldwrap.addEventListener('click', function (e) {
+					e.stopPropagation();
+					
+					/*
+					//Custom shit vett
+					if(!$(selectfieldwrap).hasClass('active')) {
+						//If not active trigger the others to close
+						$(window).trigger('toggle');
+					}*/
 					methods.slideToggle();
 				}, false);
 
-				selectfieldwrap.appendChild(select)
-
-				selectwrap.appendChild(selectfieldwrap);
-
-				list = document.createElement('div');
-				list.className="dropdown_list";
-
+				//Trigger closing when other dropdowns engage
 				/*
-				select.addEventListener('click', function (e) {
-					//e.stopPropagation();
-					th.slideToggle();
-					console.log('hæ')
-				}, false);
-				w.addEventListener('click', function () {
-					th.hide();
-				}, true);
+				$(window).on('toggle', function () {
+					if($(th).parents('.rsk_dropdownWrap').find('.active').length > 0) {
+						methods.slideToggle();
+					}
+				}).on('click', function () {
+					methods.hide();
+				});
 				*/
 
+				//Custom shit vett
+				/*
+				$(this).on('updatelists', function () {
+					list = methods.setOptions();
+					selectwrap.replaceChild(list, selectwrap.childNodes[1]);
+
+					dropheight = list.clientHeight;
+					if(settings.height) {
+						dropheight = settings.height;
+					}
+					
+					list.style.height = 0;
+				})*/
+				
+				selectfieldwrap.appendChild(select);
+				selectwrap.appendChild(selectfieldwrap);
 				if(settings.multiple) {
 					this.multiple = true;
 				}
+				list = methods.setOptions();
 
-				for(i; i < options.length; i++) {
-					optionValue = options[i].value;
-					optionText  = options[i].innerHTML;
-					option = document.createElement('div');
-					option.setAttribute('data-value', optionValue);
-					
-					if(settings.multiple && i > 0) {
-						option.innerHTML = '<div class="checkboxwrap"><input type="checkbox" class="checkbox" /></div><div class="value">'+optionText+'</div>';
-					} else {
-						option.innerHTML = optionText;
-					}
-
-					if(settings.onSelect) {
-						option.addEventListener('click', function (e) {
-							var th = this;
-							settings.onSelect({evt: e, option: th, methods: methods});
-						});
-					} else {
-						option.addEventListener('click', function (e) {
-							this.value = this.getAttribute('data-value');
-							select.innerHTML = this.innerHTML;
-							methods.slideToggle();
-						}, false);
-					}
-					list.appendChild(option);
-				}
-				
 				selectwrap.appendChild(list);
 				th.el = selectwrap;
-
+				
 				//Replace
-				var parent = this.parentNode;
-				parent.removeChild(this);
-				selectwrap.appendChild(this);
+				var parent = th.parentNode;
+				parent.removeChild(th);
+				selectwrap.appendChild(th);
 
-				this.style.display = "none";
-				parent.appendChild(selectwrap);				
+				th.style.display = "none";
+				parent.appendChild(selectwrap);	
 				
 				//Determine height and hide it
 				dropheight = list.clientHeight;
@@ -462,7 +486,6 @@
 				
 				list.style.height = 0;
 
-
 				if(settings.onInit) {
 					settings.onInit();
 				}
@@ -470,23 +493,23 @@
 
 			//return new DropdownConstructor;
 			_el.forEach(function (el, i) {
-				return DropdownConstructor.call(el);
+				DropdownConstructor.call(el);
 			});
 		}
 	};
 
-	var RskConstructor = function (el) {
+	var GskConstructor = function (el) {
 		if(el) {
 			this.el = document.querySelectorAll(el);
 		}
 	}
-	RskConstructor.prototype.widget = function (name, options) {
+	GskConstructor.prototype.widget = function (name, options) {
 		//Fyr opp widget på elementet
-		return widgets[name].call(this, options);
+		widgets[name].call(this, options);
 	}
 
-	window.RSK = function (el) {
-	 	return new RskConstructor(el);
+	window.GSK = function (el) {
+	 	return new GskConstructor(el);
 	}
 
 }(window, document, undefined));
@@ -494,5 +517,4 @@
 //Brukes
 /*
 	RSK('.bajnskap').widget('lightbox', {});
-
 */
