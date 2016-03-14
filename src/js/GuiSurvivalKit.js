@@ -84,6 +84,186 @@
 			return new ProgressbarConstructor;
 		},
 
+		Lightbox: function (opts) {
+			var _el = this.el;
+
+			var settings = {
+				html: 'Mangler innhold'
+			};
+
+			settings = tools.extend(settings, opts);
+
+			var LightboxConstructor = function () {
+				var haze, maindiv, close, th = this;
+				haze = document.createElement('div');
+				haze.className="lightboxHaze";
+
+				maindiv = document.createElement('div');
+				maindiv.className = "lightbox";
+				maindiv.innerHTML = settings.html;
+
+				close = document.createElement('div');
+				close.className = "close";
+				close.addEventListener('click', function () {
+					th.close();
+				}, false);
+				maindiv.appendChild(close);
+
+				haze.appendChild(maindiv);
+
+				this.html = haze;
+
+				if(settings.callback) {
+					settings.callback(this.html);
+				}
+
+			};
+			LightboxConstructor.prototype.open = function () {
+				_el[0].appendChild(this.html);
+			};
+			LightboxConstructor.prototype.close = function () {
+				if(settings.onBeforeClose) {
+					settings.onBeforeClose();
+				}
+				_el[0].removeChild(this.html);
+				if(settings.onClose) {
+					settings.onClose();
+				}
+			};
+
+			return new LightboxConstructor;
+		},
+
+		Slider: function (opts) {
+			var _el = Array.prototype.slice.call(this.el);
+
+			var settings = {
+				range: false,
+				max: 100,
+				min: 0,
+				values: [this.min, this.max]
+			};
+			settings = tools.extend(settings, opts);
+
+			var SliderHandle = function (val) {
+				var th = this;
+				th.start = settings.values[0];
+				th.delta;
+				th.slidemax;
+				th.handle = document.createElement('div');
+				th.handle.setAttribute('data-val', val);
+				th.handle.className="rsk_slider_handle";
+				th.handle.style.left = val+'%';
+
+				var move = function (e) {
+					th.mousemove(e);
+				}
+				th.handle.addEventListener('mousedown', function (e) {
+					th.start = parseInt(th.handle.getAttribute('data-val'));
+					window.addEventListener('mousemove', move, false);
+				}, false);
+
+				window.addEventListener('mouseup', function (e) {
+					window.removeEventListener('mousemove', move);
+				});
+			};
+			SliderHandle.prototype.mousemove = function (e) {
+				var th = this;
+					console.log(th.handle.parentNode.offsetWidth/(e.clientX-th.handle.parentNode.offsetLeft)*100);return
+					th.delta = (e.clientX/th.handle.parentNode.offsetLeft) - th.start;
+					//console.log(th.delta);
+					//th.delta = e.clientX - th.handle.getAttribute('data-val');
+
+					if(th.start+th.delta < 0) {
+						start = 0;
+					} else if(th.start+th.delta > th.slidemax) {
+						th.start = th.slidemax;
+					} else {
+						th.start = th.start+th.delta;
+					}
+					th.handle.setAttribute('data-val', th.start);
+					th.handle.style.left = th.start+'%';
+					
+			};
+			SliderHandle.prototype.render = function () {
+				return this.handle;
+			};
+
+			var SliderConstructor = function () {
+				var sliderwrap,
+				sliderrail,
+				sliderhandle,
+				parent = this.parentNode,
+				originalSlider = this;
+
+				sliderwrap = document.createElement('div');
+				sliderwrap.className = "rsk_slider_wrap";
+				sliderrail = document.createElement('div');
+				sliderrail.className = "rsk_slider_rail";
+
+				sliderhandle = new SliderHandle(settings.values[0]);
+				/*
+				sliderhandle = document.createElement('div');
+				sliderhandle.setAttribute('data-val', settings.min);
+				sliderhandle.className="rsk_slider_handle";*/
+				//sliderwrap.appendChild(sliderrail);
+				
+				//EVENTS
+				//console.log(settings.values[0])
+				/*
+				var start = settings.values[0], 
+					delta, 
+					slidemax;
+				var mousemove = function (e) {
+					//delta = e.clientX - start;
+					delta = (e.clientX-sliderwrap.offsetLeft) - start;
+					console.log(start)
+					
+					
+					//Something fishy going on with delta
+					if(start+delta < 0) {
+						start = 0;
+					} else if(start+delta > slidemax) {
+						start = slidemax;
+					} else {
+						start = start+delta;
+					}	
+					/*				
+					sliderhandle.setAttribute('data-val', start);
+					sliderhandle.style.left = start+'px';
+					*/
+					
+				//}
+
+				/*
+				sliderhandle.addEventListener('mousedown', function (e) {
+					start = parseInt(sliderhandle.getAttribute('data-val'));
+					window.addEventListener('mousemove', mousemove, false);
+				}, false);
+				*/
+				//EVENTS SLUTT
+
+				parent.replaceChild(sliderwrap, originalSlider);
+				sliderwrap.appendChild(originalSlider);
+				sliderwrap.appendChild(sliderrail);
+				sliderwrap.appendChild(sliderhandle.render());
+
+				//sliderhandle.slidemax = sliderwrap.offsetWidth;
+				sliderhandle.slidemax = settings.max;
+
+				if(settings.range) {
+					var sliderhandle2 = new SliderHandle(settings.values[1]);
+					sliderhandle2.handle.setAttribute('data-val', settings.values[1]);
+					sliderhandle2.slidemax = sliderwrap.offsetWidth;
+					sliderwrap.appendChild(sliderhandle2.render());
+				}
+			}
+
+			_el.forEach(function (el, i) {
+				SliderConstructor.call(el);
+			});
+		},
+
 		Radiobutton: function (opts) {
 			var _el = this.el;
 			_el = Array.prototype.slice.call(_el);
